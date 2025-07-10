@@ -1,8 +1,8 @@
 import httpx
 import logging
-from mcp.server.fastmcp import FastMCP
 import os
 from typing import Any
+from mcp.server.fastmcp import FastMCP
 
 """
 Weather MCP Server
@@ -135,3 +135,7 @@ async def get_weather_forecast_by_city(city: str, days: int = 3) -> str:
     header = f"{days}-Day Weather Forecast for {location.get('name', city)}, {location.get('region', '')}, {location.get('country', '')}:\n"
     return header + "\n---\n".join(forecasts)
     
+
+if __name__ == "__main__":
+    mcp.run()
+

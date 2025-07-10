@@ -136,6 +136,25 @@ Chance of Rain: 75%
 UV Index: 5
 ```
 
+## Deployment
+
+This MCP server can be deployed online and integrated with Claude Desktop. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
+
+### Quick Deployment Steps:
+
+**Deploy to Railway (Recommended):**
+   - Push to GitHub
+   - Connect to [Railway.app](https://railway.app)
+   - Set `WEATHERAPI_KEY` environment variable
+   - Get your deployment URL
+
+
+### Available Deployment URLs:
+- Health check: `https://your-app.railway.app/health`
+- Service info: `https://your-app.railway.app/`
+- Weather API: `https://your-app.railway.app/weather/{city}`
+- Forecast API: `https://your-app.railway.app/forecast/{city}`
+
 ## Project Structure
 
 ```
