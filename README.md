@@ -1,194 +1,220 @@
 # Weather MCP Server
 
-A Model Context Protocol (MCP) server that provides real-time weather information and forecasts for cities worldwide using the WeatherAPI service.
+A **Model Context Protocol (MCP) server** that provides AI assistants and applications with real-time weather information and forecasts for any location worldwide. This server acts as a bridge between AI models and weather APIs, allowing them to fetch current weather conditions, forecasts, and location-based weather data.
+
+## What is MCP?
+
+**Model Context Protocol (MCP)** is a standard that allows AI assistants to connect to external data sources and tools. This weather MCP server:
+
+🤖 **Connects AI to Weather Data**: Enables AI assistants like Claude, ChatGPT, or any MCP-compatible application to access weather information  
+🌍 **Real-time Weather Access**: Provides current weather conditions and forecasts for any city or coordinates worldwide  
+📍 **Smart Location Detection**: Automatically detects user location via IP address for personalized weather data  
+⚡ **Instant Responses**: Fast, reliable weather data formatted for AI consumption  
 
 ## Features
 
-- **Current Weather**: Get real-time weather conditions for any city
-- **Weather Forecast**: Get up to 3-day weather forecasts
-- **Global Coverage**: Works with cities worldwide
-- **Detailed Information**: Includes temperature, humidity, wind, UV index, and more
-- **Travel Planning**: Helps with weather-based travel decisions
+✨ **Current Weather**: Get real-time weather for any city worldwide  
+📅 **Weather Forecasts**: Multi-day weather forecasts (up to 3 days)  
+📍 **Auto Location**: Automatic location detection via IP address  
+🌐 **Coordinate Support**: Weather lookup by latitude/longitude  
+🎯 **User-Friendly**: Weather data formatted with emojis and clear descriptions  
+⚡ **High Performance**: Built with async/await for fast responses  
 
-## Example Use Case
+## How It Works
 
-**Question**: "I am at Durgapur, tell me if I can travel to Kolkata without worrying about rain?"
+1. **AI Assistant Request**: An AI assistant needs weather information for a user
+2. **MCP Connection**: The assistant connects to this weather MCP server
+3. **Tool Execution**: The server fetches real-time weather data from WeatherAPI
+4. **Formatted Response**: Weather information is returned in a user-friendly format
+5. **AI Integration**: The assistant uses this data to provide helpful weather insights
 
-**Response**: Let me check the current weather conditions in both Durgapur and Kolkata to help you plan your travel.
+## Quick Start
 
-### Weather Analysis Results
-
-**Current situation**: There are thundery outbreaks near Durgapur, and both cities have high humidity (91-94%) with misty/overcast conditions.
-
-**Today and tomorrow**: Both cities are forecasted to have moderate rain with very high chances of precipitation (85-92%). The journey between Durgapur and Kolkata will likely involve encountering rain.
-
-### Travel Recommendations
-
-- 🌂 Carry an umbrella and waterproof clothing
-- 🚗 If traveling by road, drive carefully due to reduced visibility and wet roads
-- ⏰ Allow extra time for your journey as rain may cause delays
-- 🚌 Check train/bus schedules as they might be affected by weather
-
-**Conclusion**: While you can certainly travel, I'd suggest being well-prepared for wet conditions rather than traveling without rain concerns. If your travel is flexible, you might want to monitor the weather for a day or two to see if conditions improve.
-
-## Installation
-
-1. Clone this repository
-2. Install dependencies using UV (recommended) or pip:
+### 1. Installation
 
 ```bash
-# Create virtual enviroment and run
-uv venv
-.venv\Scripts\activate
+# Clone the repository
+git clone https://github.com/shreyaspathak11/weather_mcp.git
+cd weather_mcp
 
 # Install dependencies
-uv add mcp[cli] httpx
-
+pip install -r requirements_modular.txt
 ```
 
-3. Set up your WeatherAPI key:
-   - Get a free API key from [WeatherAPI.com](https://www.weatherapi.com/)
-   - Set the environment variable:
-     ```bash
-     WEATHERAPI_KEY=your_api_key_here
-     ```
+### 2. Configuration
 
-## Usage
+Create a `.env` file in the project root:
+```bash
+WEATHERAPI_KEY=your_api_key_here
+```
 
-### Running the MCP Server
+Or set the environment variable:
+```bash
+export WEATHERAPI_KEY="your_api_key_here"
+```
+
+> **Note**: A default API key is included for testing, but get your own free key from [WeatherAPI.com](https://www.weatherapi.com/) for production use.
+
+### 3. Running the Server
 
 ```bash
-code $env:AppData\Claude\claude_desktop_config.json
+# Start the MCP server
+python server.py
 ```
-Add following to the file
+
+The server will start and be ready to handle MCP requests from AI assistants.
+
+## Available Weather Tools
+
+This MCP server provides the following tools that AI assistants can use:
+
+### 🏙️ Weather by City
+- **`get_weather_by_city(city)`** - Get current weather for any city
+  ```
+  Example: get_weather_by_city("London") 
+  Returns: Current temperature, conditions, humidity, wind, etc.
+  ```
+
+- **`get_weather_forecast_by_city(city, days)`** - Get multi-day forecast
+  ```
+  Example: get_weather_forecast_by_city("New York", 3)
+  Returns: 3-day forecast with daily highs, lows, conditions
+  ```
+
+### 📍 Weather by Coordinates
+- **`get_weather_by_coordinates(lat, lon)`** - Weather for exact coordinates
+  ```
+  Example: get_weather_by_coordinates(40.7128, -74.0060)
+  Returns: Weather for precise latitude/longitude
+  ```
+
+- **`get_weather_forecast_by_coordinates(lat, lon, days)`** - Forecast by coordinates
+  ```
+  Example: get_weather_forecast_by_coordinates(35.6762, 139.6503, 2)
+  Returns: 2-day forecast for Tokyo coordinates
+  ```
+
+### 🎯 Smart Location Detection
+- **`get_weather_at_current_location()`** - Weather for user's detected location
+  ```
+  Automatically detects user location via IP and returns weather
+  Includes emoji formatting and location disclaimer
+  ```
+
+- **`get_forecast_at_current_location(days)`** - Forecast for detected location
+  ```
+  Multi-day forecast for user's approximate location
+  ```
+
+### 🌐 Location Services
+- **`get_user_current_location()`** - Get user's approximate location
+  ```
+  Returns city, region, country, coordinates, timezone
+  ```
+
+- **`get_location_by_ip(ip_address)`** - Location info for specific IP
+  ```
+  Example: get_location_by_ip("8.8.8.8")
+  Returns: Geographic information for the IP address
+  ```
+
+- **`get_location_and_weather_by_ip(ip_address)`** - Combined location + weather
+  ```
+  Get both location details and current weather for an IP
+  ```
+
+## Example AI Interactions
+
+### Simple Weather Query
+```
+User: "What's the weather like in Tokyo?"
+AI uses: get_weather_by_city("Tokyo")
+Response: "Tokyo is currently 22°C with partly cloudy skies..."
+```
+
+### Location-Aware Weather
+```
+User: "How's the weather where I am?"
+AI uses: get_weather_at_current_location()
+Response: "🌟 Weather at Your Current Location: 📍 New York, NY, US..."
+```
+
+### Planning Assistance
+```
+User: "Will it rain in London this weekend?"
+AI uses: get_weather_forecast_by_city("London", 3)
+Response: "Here's the 3-day forecast for London..."
+```
+
+## Installation & Setup
+
+### 1. Install Dependencies
+```bash
+# Install the package and dependencies
+pip install -e .
+```
+
+### 2. Configure API Key
+Create a `.env` file in the root directory:
+```env
+WEATHERAPI_KEY=your_api_key_here
+```
+
+> Get your free API key from [WeatherAPI.com](https://www.weatherapi.com/) - supports 1 million calls/month on the free tier.
+
+### 3. Run the MCP Server
+```bash
+# Start the server (listens for MCP connections)
+python server.py
+```
+
+## MCP Integration
+
+### For AI Applications
+Connect your AI assistant to this server to enable weather capabilities:
 
 ```json
 {
   "mcpServers": {
     "weather": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "D:/YOUR/PARENT/FOLDER/weather",
-        "run",
-        "weather.py"
-      ],
+      "command": "python",
+      "args": ["path/to/weather/server.py"],
       "env": {
-        "WEATHERAPI_KEY": "your-api-key"
+        "WEATHERAPI_KEY": "your_api_key"
       }
     }
   }
 }
 ```
-### Available Tools
 
-#### 1. `get_weather_by_city(city: str)`
-Get current weather conditions for any city.
+### For Claude Desktop
+Add to your Claude configuration to give Claude weather abilities:
 
-**Parameters:**
-- `city`: Name of the city (e.g., "Durgapur", "London", "New York")
-
-**Example Response:**
-```
-Weather for Durgapur, West Bengal, India:
-
-Current Conditions: Partly cloudy
-Temperature: 28°C (feels like 32°C)
-Humidity: 78%
-Pressure: 1012 mb
-Wind: 15 km/h NE
-UV Index: 6
-Visibility: 10 km
-
-Local Time: 2025-07-11 14:30
-Last Updated: 2025-07-11 14:15
+```json
+{
+  "weather": {
+    "command": "python",
+    "args": ["d:/AI Projects/weather/server.py"]
+  }
+}
 ```
 
-#### 2. `get_weather_forecast_by_city(city: str, days: int = 3)`
-Get weather forecast for any city.
+Once connected, Claude can answer questions like:
+- "What's the weather in Paris?"
+- "Will it rain tomorrow in my location?"
+- "What's the forecast for this weekend?"
 
-**Parameters:**
-- `city`: Name of the city
-- `days`: Number of forecast days (1-3, default is 3)
+## Technical Requirements
 
-**Example Response:**
-```
-3-Day Weather Forecast for Kolkata, West Bengal, India:
-
-2025-07-11:
-Weather: Moderate rain
-Max Temperature: 30°C
-Min Temperature: 25°C
-Avg Temperature: 27°C
-Humidity: 85%
-Max Wind: 20 km/h
-Chance of Rain: 90%
-UV Index: 4
----
-2025-07-12:
-Weather: Light rain
-Max Temperature: 29°C
-Min Temperature: 24°C
-Avg Temperature: 26°C
-Humidity: 82%
-Max Wind: 18 km/h
-Chance of Rain: 75%
-UV Index: 5
-```
-
-## Project Structure
-
-```
-weather/
-├── main.py              # Entry point for the MCP server
-├── weather.py           # Main weather functionality and M
-├── pyproject.toml       # Project configuration and 
-├── uv.lock              # UV lock file for dependency 
-└── README.md            # This file
-```
-
-## Dependencies
-
-- **httpx**: For making HTTP requests to weather APIs
-- **mcp**: Model Context Protocol framework
-- **Python 3.13+**: Required Python version
-
-## API Information
-
-This project uses [WeatherAPI.com](https://www.weatherapi.com/) which provides:
-- Current weather conditions
-- Weather forecasts
-- Global city coverage
-- Free tier with up to 1,000 calls/month
-
-## Error Handling
-
-The server includes comprehensive error handling for:
-- Invalid city names
-- API key issues
-- Network connectivity problems
-- Rate limiting
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+- **Python 3.8+**: Required minimum version
+- **Dependencies**: httpx, mcp, python-dotenv
+- **APIs**: WeatherAPI.com (primary), IP-API.com (location detection)
+- **Error Handling**: Comprehensive API failure protection
 
 ## License
 
 This project is open source and available under the MIT License.
 
-## Support
-
-For issues and questions:
-- Check the WeatherAPI documentation
-- Ensure your API key is properly set
-- Verify city names are spelled correctly
-- Check your internet connection
-
 ---
 
-*Built with Model Context Protocol (MCP) for seamless integration with AI assistants.*
+**🌤️ Empowering AI assistants with real-time weather intelligence**

@@ -1,0 +1,5 @@
+# Weather MCP Server Requirements
+httpx>=0.24.0
+mcp>=1.0.0
+python-dotenv>=1.0.0
+python>=3.8.0

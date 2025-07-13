@@ -11,6 +11,17 @@ This server provides tools to fetch current weather and forecasts for any city w
 It also includes location detection tools to get weather for the user's current location.
 """
 
+import sys
+import os
+
+
+from mcp.server.fastmcp import FastMCP
+from src.services.weather_service import WeatherService
+from src.services.location_service import LocationService
+
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
 # Initialize the MCP server
 mcp = FastMCP("weather")
 
@@ -478,38 +489,4 @@ async def get_forecast_at_current_location(days: int = 3) -> str:
     Returns:
         Weather forecast for the user's detected location
     """
-    location_data = await get_user_location_by_ip()
-    
-    if not location_data:
-        return "❌ Sorry, I couldn't determine your current location to get the forecast. You can ask for forecast in a specific city instead!"
-    
-    city = location_data.get("city")
-    lat = location_data.get("lat")
-    lon = location_data.get("lon")
-    
-    if not city and (lat is None or lon is None):
-        return "❌ Could not determine a valid location for weather lookup."
-    
-    # Use city name if available, otherwise use coordinates
-    query = city if city else f"{lat},{lon}"
-    
-    data = await fetch_weather_data(query, "forecast", days)
-
-    if not data:
-        return f"Unable to fetch forecast data for your current location ({query}). Please try asking for forecast in a specific city."
-
-    if "error" in data:
-        return f"Error getting forecast for your location: {data['error'].get('message', 'Unknown error occurred')}"
-
-    location = data.get("location", {})
-    forecast = data.get("forecast", {})
-    forecast_days = forecast.get("forecastday", [])
-    
-    if not forecast_days:
-        return f"No forecast data available for your current location."
-    
-    forecasts = [format_forecast_day(day_forecast, with_emojis=True).strip() for day_forecast in forecast_days]
-    
-    header = f"🌟 {len(forecast_days)}-Day Weather Forecast for Your Location:\n📍 {format_location_string(location)}:\n\n💡 Location detected via IP address - may be approximate\n"
-    return header + "\n" + "─" * 50 + "\n".join(forecasts)
-
+    return await WeatherService.get_forecast_at_current_location(days)
