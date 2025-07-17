@@ -554,3 +554,137 @@ async def get_forecast_at_current_location(days: int = 3) -> str:
     header = f"🌟 {days}-Day Weather Forecast for Your Location:\n📍 {location.get('name', 'Your location')}, {location.get('region', '')}, {location.get('country', '')}:\n\n💡 Location detected via IP address - may be approximate\n"
     return header + "\n" + "─" * 50 + "\n".join(forecasts)
 
+
+# MCP TOOL DEFINITIONS
+@mcp.tool()
+async def get_weather_by_city(city: str) -> str:
+    """Get current weather for any city worldwide using WeatherAPI.
+
+    Args:
+        city: Name of the city (e.g., "Durgapur", "London", "New York")
+    """
+    try:
+        if not WEATHERAPI_KEY or WEATHERAPI_KEY == "your_weather_api_key_here":
+            return "Error: WEATHERAPI_KEY is not configured. Please set your WeatherAPI key."
+        
+        url = f"{WEATHERAPI_BASE}/current.json?key={WEATHERAPI_KEY}&q={city}&aqi=yes"
+        data = await make_request(url)
+        
+        if not data:
+            return f"Unable to fetch weather data for {city}. Please check the city name."
+        
+        if "error" in data:
+            return f"Error: {data['error'].get('message', 'Unknown error occurred')}"
+        
+        location = data.get("location", {})
+        current = data.get("current", {})
+        condition = current.get("condition", {})
+        
+        weather_info = f"""
+🌟 Weather for {location.get('name', city)}, {location.get('region', '')}, {location.get('country', '')}:
+
+☁️  Current Conditions: {condition.get('text', 'Unknown')}
+🌡️  Temperature: {current.get('temp_c', 'Unknown')}°C (feels like {current.get('feelslike_c', 'Unknown')}°C)
+💧 Humidity: {current.get('humidity', 'Unknown')}%
+🏔️  Pressure: {current.get('pressure_mb', 'Unknown')} mb
+💨 Wind: {current.get('wind_kph', 'Unknown')} km/h {current.get('wind_dir', '')}
+☀️  UV Index: {current.get('uv', 'Unknown')}
+👁️  Visibility: {current.get('vis_km', 'Unknown')} km
+
+🕐 Local Time: {location.get('localtime', 'Unknown')}
+⏰ Last Updated: {current.get('last_updated', 'Unknown')}
+        """
+        
+        return weather_info.strip()
+        
+    except Exception as e:
+        return f"Error getting weather for {city}: {str(e)}"
+
+
+@mcp.tool()
+async def get_weather_forecast_by_city(city: str, days: int = 3) -> str:
+    """Get weather forecast for any city worldwide using WeatherAPI.
+
+    Args:
+        city: Name of the city (e.g., "Durgapur", "London", "New York")
+        days: Number of forecast days (1-3, default is 3)
+    """
+    try:
+        if not WEATHERAPI_KEY or WEATHERAPI_KEY == "your_weather_api_key_here":
+            return "Error: WEATHERAPI_KEY is not configured. Please set your WeatherAPI key."
+        
+        # Limit to 3 days for free tier
+        days = min(max(days, 1), 3)
+        
+        url = f"{WEATHERAPI_BASE}/forecast.json?key={WEATHERAPI_KEY}&q={city}&days={days}&aqi=no&alerts=no"
+        data = await make_request(url)
+        
+        if not data:
+            return f"Unable to fetch forecast data for {city}. Please check the city name."
+        
+        if "error" in data:
+            return f"Error: {data['error'].get('message', 'Unknown error occurred')}"
+        
+        location = data.get("location", {})
+        forecast = data.get("forecast", {})
+        forecast_days = forecast.get("forecastday", [])
+        
+        if not forecast_days:
+            return f"No forecast data available for {city}."
+        
+        forecasts = []
+        for day_forecast in forecast_days:
+            date = day_forecast.get("date", "")
+            day_data = day_forecast.get("day", {})
+            condition = day_data.get("condition", {})
+            
+            forecast_info = f"""
+📅 {date}:
+☁️  Weather: {condition.get('text', 'Unknown')}
+🌡️  Max Temperature: {day_data.get('maxtemp_c', 'Unknown')}°C
+🌡️  Min Temperature: {day_data.get('mintemp_c', 'Unknown')}°C
+🌡️  Avg Temperature: {day_data.get('avgtemp_c', 'Unknown')}°C
+💧 Humidity: {day_data.get('avghumidity', 'Unknown')}%
+💨 Max Wind: {day_data.get('maxwind_kph', 'Unknown')} km/h
+🌧️  Chance of Rain: {day_data.get('daily_chance_of_rain', 'Unknown')}%
+☀️  UV Index: {day_data.get('uv', 'Unknown')}
+            """
+            forecasts.append(forecast_info.strip())
+        
+        header = f"🌟 {len(forecast_days)}-Day Weather Forecast for {location.get('name', city)}, {location.get('region', '')}, {location.get('country', '')}:\n"
+        return header + "\n" + "─" * 50 + "\n".join(forecasts)
+        
+    except Exception as e:
+        return f"Error getting forecast for {city}: {str(e)}"
+
+
+@mcp.tool()
+async def get_weather_at_current_location() -> str:
+    """Get current weather at the user's detected location.
+    
+    This tool combines location detection with weather fetching to provide
+    weather information for the user's current approximate location.
+    
+    Returns:
+        Current weather information for the user's detected location
+    """
+    try:
+        location_data = await get_user_location_by_ip()
+        
+        if not location_data:
+            return "❌ Sorry, I couldn't determine your current location to get the weather. You can ask for weather in a specific city instead!"
+        
+        city = location_data.get("city")
+        
+        if not city:
+            return "❌ Could not determine a valid city for weather lookup."
+        
+        # Get weather for the detected city
+        return await get_weather_by_city(city)
+        
+    except Exception as e:
+        return f"Error getting weather for your current location: {str(e)}"
+
+
+if __name__ == "__main__":
+    mcp.run()
